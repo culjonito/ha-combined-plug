@@ -2,13 +2,15 @@
 
 One virtual Home Assistant outlet from two or more physical outlets. No YAML, automations, MQTT or helper entities needed.
 
-**Status: 0.3.1. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
+**Status: 0.4.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
 
 ## Features
 
 - Set up from **Settings → Devices & services → Add integration → Combined Plug**.
 - Choose a name and two or more physical switch entities, then tick the measurements to include (setup step).
-- Creates **one virtual device** with **one switch** that controls all source outlets.
+- Creates **one virtual device** with a **main switch** for all source outlets, plus **one switch per source outlet** so each can be switched individually.
+- Optional: hide the original outlets' entities, so only the combined outlet is visible.
+- Available in English and German; follows Home Assistant's language.
 - Detects measurement sensors from each source outlet's **device registry** (works with ZHA, Matter and other integrations that expose regular Home Assistant sensor entities).
 - Combines readings only when every selected outlet provides the matching measurement:
 
@@ -29,7 +31,7 @@ One virtual Home Assistant outlet from two or more physical outlets. No YAML, au
 
 ## Measurements
 
-During setup, untick any measurement the virtual outlet should not expose. Later, use the integration's **Configure** dialog. Changes reload the integration. Exported energy is unticked by default.
+During setup (and later via **Configure**), untick any measurement the virtual outlet should not expose, and choose whether to hide the original outlets. Exported energy is unticked by default. Hiding only affects entities that were hidden by this integration; deleting the combined outlet unhides them again.
 
 ## Installation
 

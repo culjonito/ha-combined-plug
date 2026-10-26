@@ -10,6 +10,7 @@ CONF_SENSORS = "sensors"
 CONF_ALL_ON = "all_on"
 CONF_EXCLUDED = "excluded"
 CONF_MEASUREMENTS = "measurements"
+CONF_HIDE_SOURCES = "hide_sources"
 # Measurements left out by default: exported energy is only relevant with PV or feed-in.
 DEFAULT_EXCLUDED = ("energy_export",)
 

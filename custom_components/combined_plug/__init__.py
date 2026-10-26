@@ -11,7 +11,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_track_state_change_event
 
 from .calculation import active_measurements, replace_entity_id
-from .const import CONF_EXCLUDED, CONF_SWITCHES, DEFAULT_EXCLUDED
+from .const import CONF_EXCLUDED, CONF_HIDE_SOURCES, CONF_SWITCHES, DEFAULT_EXCLUDED
 from .discovery import discover_sensors
 
 PLATFORMS = (Platform.SWITCH, Platform.SENSOR)
@@ -69,6 +69,29 @@ class CombinedPlugRuntime:
         self._entities.discard(entity)
 
 
+@callback
+def _apply_source_visibility(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Hide or unhide the physical outlets' entities, as chosen in the options.
+
+    Only entities hidden by this integration (hidden_by=user) are touched when unhiding,
+    so entities you hid yourself are not reset by accident.
+    """
+    registry = er.async_get(hass)
+    runtime = entry.runtime_data
+    sources = set(runtime.switches)
+    for sensor_ids in runtime.sensors.values():
+        sources.update(sensor_ids)
+    hide = entry.options.get(CONF_HIDE_SOURCES, False)
+    for entity_id in sources:
+        ent = registry.async_get(entity_id)
+        if ent is None:
+            continue
+        if hide and ent.hidden_by is None:
+            registry.async_update_entity(entity_id, hidden_by=er.RegistryEntryHider.USER)
+        elif not hide and ent.hidden_by == er.RegistryEntryHider.USER:
+            registry.async_update_entity(entity_id, hidden_by=None)
+
+
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Options changed: rebuild with the new measurement selection."""
     await hass.config_entries.async_reload(entry.entry_id)
@@ -78,6 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     runtime = CombinedPlugRuntime(hass, entry)
     entry.runtime_data = runtime
     runtime.start()
+    _apply_source_visibility(hass, entry)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -85,6 +109,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Deleting the combined outlet gives the original outlets back."""
+    if not entry.options.get(CONF_HIDE_SOURCES, False):
+        return
+    registry = er.async_get(hass)
+    for entity_id in entry.data.get(CONF_SWITCHES, []):
+        source = registry.async_get(entity_id)
+        if source is None or source.device_id is None:
+            continue
+        for ent in er.async_entries_for_device(registry, source.device_id):
+            if ent.hidden_by == er.RegistryEntryHider.USER:
+                registry.async_update_entity(ent.entity_id, hidden_by=None)
 
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

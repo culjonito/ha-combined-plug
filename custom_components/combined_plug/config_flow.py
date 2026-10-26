@@ -11,7 +11,15 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er, selector
 
-from .const import CONF_EXCLUDED, CONF_MEASUREMENTS, CONF_SWITCHES, DEFAULT_EXCLUDED, DOMAIN, MEASUREMENT_BY_KEY
+from .const import (
+    CONF_EXCLUDED,
+    CONF_HIDE_SOURCES,
+    CONF_MEASUREMENTS,
+    CONF_SWITCHES,
+    DEFAULT_EXCLUDED,
+    DOMAIN,
+    MEASUREMENT_BY_KEY,
+)
 from .discovery import discover_sensors
 
 
@@ -70,7 +78,7 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema({
             vol.Required(CONF_NAME, default="Combined Plug"): selector.TextSelector(),
             vol.Required(CONF_SWITCHES): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="switch", multiple=True)
+                selector.EntitySelectorConfig(domain="switch", device_class="outlet", multiple=True)
             ),
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
@@ -83,12 +91,13 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(
                 title=self._name,
                 data={CONF_SWITCHES: self._switches},
-                options={CONF_EXCLUDED: excluded},
+                options={CONF_EXCLUDED: excluded, CONF_HIDE_SOURCES: user_input[CONF_HIDE_SOURCES]},
             )
 
         default = [key for key in self._detected if key not in DEFAULT_EXCLUDED]
         schema = vol.Schema({
             vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(self._detected),
+            vol.Required(CONF_HIDE_SOURCES, default=False): selector.BooleanSelector(),
         })
         return self.async_show_form(step_id="measurements", data_schema=schema)
 
@@ -107,12 +116,19 @@ class CombinedPlugOptionsFlow(config_entries.OptionsFlow):
             selected = set(user_input[CONF_MEASUREMENTS])
             return self.async_create_entry(
                 title="",
-                data={CONF_EXCLUDED: [key for key in detected if key not in selected]},
+                data={
+                    CONF_EXCLUDED: [key for key in detected if key not in selected],
+                    CONF_HIDE_SOURCES: user_input[CONF_HIDE_SOURCES],
+                },
             )
 
         current_excluded = self.config_entry.options.get(CONF_EXCLUDED, list(DEFAULT_EXCLUDED))
         default = [key for key in detected if key not in current_excluded]
         schema = vol.Schema({
             vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(detected),
+            vol.Required(
+                CONF_HIDE_SOURCES,
+                default=self.config_entry.options.get(CONF_HIDE_SOURCES, False),
+            ): selector.BooleanSelector(),
         })
         return self.async_show_form(step_id="init", data_schema=schema)
