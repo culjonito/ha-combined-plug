@@ -12,6 +12,13 @@
         "data_description": {
           "switches": "Select two or more individual physical switch entities, not a switch group."
         }
+      },
+      "measurements": {
+        "title": "Choose measurements",
+        "description": "Untick any measurement the combined outlet should not show. Exported energy is off by default.",
+        "data": {
+          "measurements": "Measurements"
+        }
       }
     },
     "error": {
@@ -24,11 +31,13 @@
     }
   },
   "options": {
-    "init": {
-      "title": "Measurements",
-      "description": "Untick any measurement the combined outlet should not expose. Changing this reloads the integration.",
-      "data": {
-        "excluded": "Excluded measurements"
+    "step": {
+      "init": {
+        "title": "Measurements",
+        "description": "Untick any measurement the combined outlet should not show. Changing this reloads the integration.",
+        "data": {
+          "measurements": "Measurements"
+        }
       }
     }
   }

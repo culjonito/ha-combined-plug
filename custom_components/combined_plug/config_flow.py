@@ -11,14 +11,30 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er, selector
 
-from .const import CONF_EXCLUDED, CONF_SWITCHES, DEFAULT_EXCLUDED, DOMAIN, MEASUREMENT_BY_KEY
+from .const import CONF_EXCLUDED, CONF_MEASUREMENTS, CONF_SWITCHES, DEFAULT_EXCLUDED, DOMAIN, MEASUREMENT_BY_KEY
 from .discovery import discover_sensors
+
+
+def _measurement_selector(detected: list[str]) -> selector.SelectSelector:
+    return selector.SelectSelector(selector.SelectSelectorConfig(
+        options=[
+            selector.SelectOptionDict(value=key, label=MEASUREMENT_BY_KEY[key].label)
+            for key in detected
+        ],
+        multiple=True,
+        mode=selector.SelectSelectorMode.LIST,
+    ))
 
 
 class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Select any two or more physical Home Assistant outlet switches."""
 
     VERSION = 2
+
+    def __init__(self) -> None:
+        self._name = ""
+        self._switches: list[str] = []
+        self._detected: list[str] = []
 
     async def async_step_user(self, user_input=None):
         errors: dict[str, str] = {}
@@ -42,13 +58,14 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 digest = hashlib.sha256(token.encode()).hexdigest()
                 await self.async_set_unique_id(digest)
                 self._abort_if_unique_id_configured()
-                if not discover_sensors(self.hass, switches):
+                detected = list(discover_sensors(self.hass, switches))
+                if not detected:
                     errors["base"] = "no_common_measurements"
                 else:
-                    return self.async_create_entry(
-                        title=user_input[CONF_NAME].strip(),
-                        data={CONF_SWITCHES: switches},
-                    )
+                    self._name = user_input[CONF_NAME].strip()
+                    self._switches = switches
+                    self._detected = detected
+                    return await self.async_step_measurements()
 
         schema = vol.Schema({
             vol.Required(CONF_NAME, default="Combined Plug"): selector.TextSelector(),
@@ -58,6 +75,23 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
+    async def async_step_measurements(self, user_input=None):
+        """Let the user untick measurements before anything is created."""
+        if user_input is not None:
+            selected = set(user_input[CONF_MEASUREMENTS])
+            excluded = [key for key in self._detected if key not in selected]
+            return self.async_create_entry(
+                title=self._name,
+                data={CONF_SWITCHES: self._switches},
+                options={CONF_EXCLUDED: excluded},
+            )
+
+        default = [key for key in self._detected if key not in DEFAULT_EXCLUDED]
+        schema = vol.Schema({
+            vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(self._detected),
+        })
+        return self.async_show_form(step_id="measurements", data_schema=schema)
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
@@ -65,25 +99,20 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class CombinedPlugOptionsFlow(config_entries.OptionsFlow):
-    """Choose which detected measurements the virtual outlet exposes."""
+    """Change which detected measurements the virtual outlet exposes."""
 
     async def async_step_init(self, user_input=None):
+        detected = list(discover_sensors(self.hass, list(self.config_entry.data[CONF_SWITCHES])))
         if user_input is not None:
-            return self.async_create_entry(title="", data={CONF_EXCLUDED: user_input[CONF_EXCLUDED]})
+            selected = set(user_input[CONF_MEASUREMENTS])
+            return self.async_create_entry(
+                title="",
+                data={CONF_EXCLUDED: [key for key in detected if key not in selected]},
+            )
 
-        detected = discover_sensors(self.hass, list(self.config_entry.data[CONF_SWITCHES]))
         current_excluded = self.config_entry.options.get(CONF_EXCLUDED, list(DEFAULT_EXCLUDED))
+        default = [key for key in detected if key not in current_excluded]
         schema = vol.Schema({
-            vol.Required(
-                CONF_EXCLUDED,
-                default=[key for key in detected if key in current_excluded],
-            ): selector.SelectSelector(selector.SelectSelectorConfig(
-                options=[
-                    selector.SelectOptionDict(value=key, label=MEASUREMENT_BY_KEY[key].label)
-                    for key in detected
-                ],
-                multiple=True,
-                mode=selector.SelectSelectorMode.LIST,
-            )),
+            vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(detected),
         })
         return self.async_show_form(step_id="init", data_schema=schema)

@@ -2,12 +2,12 @@
 
 One virtual Home Assistant outlet from two or more physical outlets. No YAML, automations, MQTT or helper entities needed.
 
-**Status: 0.3.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
+**Status: 0.3.1. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
 
 ## Features
 
 - Set up from **Settings → Devices & services → Add integration → Combined Plug**.
-- Choose a name and two or more physical switch entities.
+- Choose a name and two or more physical switch entities, then tick the measurements to include (setup step).
 - Creates **one virtual device** with **one switch** that controls all source outlets.
 - Detects measurement sensors from each source outlet's **device registry** (works with ZHA, Matter and other integrations that expose regular Home Assistant sensor entities).
 - Combines readings only when every selected outlet provides the matching measurement:
@@ -27,9 +27,9 @@ One virtual Home Assistant outlet from two or more physical outlets. No YAML, au
 - Renaming a source switch is followed automatically; the integration reloads with the new entity ID.
 - One config entry represents one group. Add Combined Plug again for additional groups.
 
-## Options
+## Measurements
 
-Open the integration's **Configure** dialog to untick measurements the virtual outlet should not expose. Changes reload the integration. Exported energy is excluded by default.
+During setup, untick any measurement the virtual outlet should not expose. Later, use the integration's **Configure** dialog. Changes reload the integration. Exported energy is unticked by default.
 
 ## Installation
 

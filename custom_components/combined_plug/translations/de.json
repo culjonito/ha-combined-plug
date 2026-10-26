@@ -12,6 +12,13 @@
         "data_description": {
           "switches": "Wähle mindestens zwei einzelne physische Schalter, keine Schaltergruppe."
         }
+      },
+      "measurements": {
+        "title": "Messwerte auswählen",
+        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Eingespeiste Energie ist standardmäßig aus.",
+        "data": {
+          "measurements": "Messwerte"
+        }
       }
     },
     "error": {
@@ -24,11 +31,13 @@
     }
   },
   "options": {
-    "init": {
-      "title": "Messwerte",
-      "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Änderungen laden die Integration neu.",
-      "data": {
-        "excluded": "Ausgeschlossene Messwerte"
+    "step": {
+      "init": {
+        "title": "Messwerte",
+        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Änderungen laden die Integration neu.",
+        "data": {
+          "measurements": "Messwerte"
+        }
       }
     }
   }
