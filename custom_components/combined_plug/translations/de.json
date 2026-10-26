@@ -1,0 +1,19 @@
+{
+  "title": "Combined Plug",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gemeinsame Steckdose erstellen",
+        "description": "Wähle mindestens zwei physische Steckdosen. Die Messsensoren werden über deren Gerätezuordnung automatisch erkannt. Keine Helfer oder YAML nötig.",
+        "data": {"name": "Name", "switches": "Steckdosen-Schalter"},
+        "data_description": {"switches": "Wähle mindestens zwei einzelne physische Schalter, keine Schaltergruppe."}
+      }
+    },
+    "error": {
+      "at_least_two": "Bitte mindestens zwei unterschiedliche Schalter auswählen.",
+      "physical_switches_only": "Bitte physische Schalter mit Gerätezuordnung auswählen, keine Gruppen oder virtuellen Schalter.",
+      "no_common_measurements": "Keine gemeinsamen Messsensoren bei allen ausgewählten Geräten erkannt. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind."
+    },
+    "abort": {"already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."}
+  }
+}
