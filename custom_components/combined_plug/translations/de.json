@@ -5,8 +5,13 @@
       "user": {
         "title": "Gemeinsame Steckdose erstellen",
         "description": "Wähle mindestens zwei physische Steckdosen. Die Messsensoren werden über deren Gerätezuordnung automatisch erkannt. Keine Helfer oder YAML nötig.",
-        "data": {"name": "Name", "switches": "Steckdosen-Schalter"},
-        "data_description": {"switches": "Wähle mindestens zwei einzelne physische Schalter, keine Schaltergruppe."}
+        "data": {
+          "name": "Name",
+          "switches": "Steckdosen-Schalter"
+        },
+        "data_description": {
+          "switches": "Wähle mindestens zwei einzelne physische Schalter, keine Schaltergruppe."
+        }
       }
     },
     "error": {
@@ -14,6 +19,17 @@
       "physical_switches_only": "Bitte physische Schalter mit Gerätezuordnung auswählen, keine Gruppen oder virtuellen Schalter.",
       "no_common_measurements": "Keine gemeinsamen Messsensoren bei allen ausgewählten Geräten erkannt. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind."
     },
-    "abort": {"already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."}
+    "abort": {
+      "already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "init": {
+      "title": "Messwerte",
+      "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Änderungen laden die Integration neu.",
+      "data": {
+        "excluded": "Ausgeschlossene Messwerte"
+      }
+    }
   }
 }

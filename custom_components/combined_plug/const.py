@@ -8,6 +8,9 @@ DOMAIN = "combined_plug"
 CONF_SWITCHES = "switches"
 CONF_SENSORS = "sensors"
 CONF_ALL_ON = "all_on"
+CONF_EXCLUDED = "excluded"
+# Measurements left out by default: exported energy is only relevant with PV or feed-in.
+DEFAULT_EXCLUDED = ("energy_export",)
 
 
 @dataclass(frozen=True, slots=True)

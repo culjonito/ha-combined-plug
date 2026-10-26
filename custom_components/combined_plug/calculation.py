@@ -41,3 +41,13 @@ def combine(key: str, values: Sequence[float], weights: Sequence[float] | None =
                 return sum(value * weight for value, weight in zip(values, weights, strict=True)) / total_weight
         return sum(values) / len(values)
     return sum(values)
+
+
+def active_measurements(discovered: dict[str, list[str]], excluded: Sequence[str]) -> dict[str, list[str]]:
+    """Drop measurements the user excluded in the options flow."""
+    return {key: sources for key, sources in discovered.items() if key not in set(excluded)}
+
+
+def replace_entity_id(switches: Sequence[str], old: str, new: str) -> list[str]:
+    """Return the source list with a renamed entity swapped in place."""
+    return [new if entity_id == old else entity_id for entity_id in switches]

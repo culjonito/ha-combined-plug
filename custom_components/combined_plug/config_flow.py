@@ -8,9 +8,10 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
+from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er, selector
 
-from .const import CONF_SWITCHES, DOMAIN
+from .const import CONF_EXCLUDED, CONF_SWITCHES, DEFAULT_EXCLUDED, DOMAIN, MEASUREMENT_BY_KEY
 from .discovery import discover_sensors
 
 
@@ -56,3 +57,33 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return CombinedPlugOptionsFlow()
+
+
+class CombinedPlugOptionsFlow(config_entries.OptionsFlow):
+    """Choose which detected measurements the virtual outlet exposes."""
+
+    async def async_step_init(self, user_input=None):
+        if user_input is not None:
+            return self.async_create_entry(title="", data={CONF_EXCLUDED: user_input[CONF_EXCLUDED]})
+
+        detected = discover_sensors(self.hass, list(self.config_entry.data[CONF_SWITCHES]))
+        current_excluded = self.config_entry.options.get(CONF_EXCLUDED, list(DEFAULT_EXCLUDED))
+        schema = vol.Schema({
+            vol.Required(
+                CONF_EXCLUDED,
+                default=[key for key in detected if key in current_excluded],
+            ): selector.SelectSelector(selector.SelectSelectorConfig(
+                options=[
+                    selector.SelectOptionDict(value=key, label=MEASUREMENT_BY_KEY[key].label)
+                    for key in detected
+                ],
+                multiple=True,
+                mode=selector.SelectSelectorMode.LIST,
+            )),
+        })
+        return self.async_show_form(step_id="init", data_schema=schema)

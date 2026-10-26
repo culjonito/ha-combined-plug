@@ -5,8 +5,13 @@
       "user": {
         "title": "Create a combined outlet",
         "description": "Select at least two physical outlets. Sensors are detected automatically from their Home Assistant devices; no helpers or YAML required.",
-        "data": {"name": "Name", "switches": "Source switches"},
-        "data_description": {"switches": "Select two or more individual physical switch entities, not a switch group."}
+        "data": {
+          "name": "Name",
+          "switches": "Source switches"
+        },
+        "data_description": {
+          "switches": "Select two or more individual physical switch entities, not a switch group."
+        }
       }
     },
     "error": {
@@ -14,6 +19,17 @@
       "physical_switches_only": "Choose physical switches that have a device in Home Assistant, not groups or virtual switches.",
       "no_common_measurements": "No common measurement sensors were detected on all selected devices. Check that the sensors are enabled and assigned to the original physical devices."
     },
-    "abort": {"already_configured": "This collection of outlets is already configured."}
+    "abort": {
+      "already_configured": "This collection of outlets is already configured."
+    }
+  },
+  "options": {
+    "init": {
+      "title": "Measurements",
+      "description": "Untick any measurement the combined outlet should not expose. Changing this reloads the integration.",
+      "data": {
+        "excluded": "Excluded measurements"
+      }
+    }
   }
 }
