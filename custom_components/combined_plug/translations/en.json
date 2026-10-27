@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Create a combined outlet",
-        "description": "Select at least two physical outlets. Measurement sensors are detected automatically from their devices. No helpers or YAML required.",
+        "description": "Select at least two physical outlets. Measurements are detected automatically from their devices. No helpers or YAML required.",
         "data": {
           "name": "Name",
           "switches": "Outlets"
@@ -14,21 +14,17 @@
         }
       },
       "measurements": {
-        "title": "Choose measurements and visibility",
-        "description": "Untick any measurement the combined outlet should not show. Exported energy is off by default.",
+        "title": "Choose measurements",
+        "description": "Untick any measurement the combined outlet should not show. The original outlets' sensors for the chosen measurements are hidden; the combined outlet shows them instead.",
         "data": {
-          "measurements": "Measurements",
-          "hide_sources": "Hide the original outlets"
-        },
-        "data_description": {
-          "hide_sources": "Hides the physical outlets' entities. They keep working; you control them through the combined outlet."
+          "measurements": "Measurements"
         }
       }
     },
     "error": {
       "at_least_two": "Choose at least two different outlets.",
       "physical_switches_only": "Choose physical outlets with their own device, not groups or virtual switches.",
-      "no_common_measurements": "No common measurements were detected on all selected devices. Check that the sensors are enabled and assigned to the original devices.",
+      "no_common_measurements": "No measurements are available on all selected outlets. Check that the sensors are enabled and assigned to the original devices.",
       "already_configured": "This combination of outlets is already set up."
     },
     "abort": {
@@ -38,22 +34,49 @@
   "options": {
     "step": {
       "init": {
-        "title": "Measurements and visibility",
+        "title": "Measurements",
         "description": "Untick any measurement the combined outlet should not show. Changes reload the integration.",
         "data": {
-          "measurements": "Measurements",
-          "hide_sources": "Hide the original outlets"
-        },
-        "data_description": {
-          "hide_sources": "Hides the physical outlets' entities. They keep working; you control them through the combined outlet."
+          "measurements": "Measurements"
         }
       }
     }
   },
   "entity": {
-    "switch": {
-      "outlet": {
-        "name": "Outlet {index}"
+    "sensor": {
+      "power": {
+        "name": "Power"
+      },
+      "energy": {
+        "name": "Energy"
+      },
+      "energy_export": {
+        "name": "Exported energy"
+      },
+      "voltage": {
+        "name": "Voltage"
+      },
+      "current": {
+        "name": "Current"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "power_factor": {
+        "name": "Power factor"
+      }
+    }
+  },
+  "selector": {
+    "measurement": {
+      "options": {
+        "power": "Power",
+        "energy": "Energy",
+        "energy_export": "Exported energy",
+        "voltage": "Voltage",
+        "current": "Current",
+        "frequency": "Frequency",
+        "power_factor": "Power factor"
       }
     }
   }

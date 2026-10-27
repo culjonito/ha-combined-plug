@@ -11,31 +11,21 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er, selector
 
-from .const import (
-    CONF_EXCLUDED,
-    CONF_HIDE_SOURCES,
-    CONF_MEASUREMENTS,
-    CONF_SWITCHES,
-    DEFAULT_EXCLUDED,
-    DOMAIN,
-    MEASUREMENT_BY_KEY,
-)
+from .const import CONF_EXCLUDED, CONF_MEASUREMENTS, CONF_SWITCHES, DOMAIN
 from .discovery import discover_sensors
 
 
 def _measurement_selector(detected: list[str]) -> selector.SelectSelector:
     return selector.SelectSelector(selector.SelectSelectorConfig(
-        options=[
-            selector.SelectOptionDict(value=key, label=MEASUREMENT_BY_KEY[key].label)
-            for key in detected
-        ],
+        options=detected,
         multiple=True,
         mode=selector.SelectSelectorMode.LIST,
+        translation_key="measurement",
     ))
 
 
 class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Select any two or more physical Home Assistant outlet switches."""
+    """Select any two or more physical outlets."""
 
     VERSION = 2
 
@@ -63,8 +53,7 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 # One configuration per unique collection, regardless of order.
                 token = ",".join(sorted(switches))
-                digest = hashlib.sha256(token.encode()).hexdigest()
-                await self.async_set_unique_id(digest)
+                await self.async_set_unique_id(hashlib.sha256(token.encode()).hexdigest())
                 self._abort_if_unique_id_configured()
                 detected = list(discover_sensors(self.hass, switches))
                 if not detected:
@@ -84,20 +73,17 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_measurements(self, user_input=None):
-        """Let the user untick measurements before anything is created."""
+        """Untick measurements before anything is created; all are on by default."""
         if user_input is not None:
             selected = set(user_input[CONF_MEASUREMENTS])
-            excluded = [key for key in self._detected if key not in selected]
             return self.async_create_entry(
                 title=self._name,
                 data={CONF_SWITCHES: self._switches},
-                options={CONF_EXCLUDED: excluded, CONF_HIDE_SOURCES: user_input[CONF_HIDE_SOURCES]},
+                options={CONF_EXCLUDED: [key for key in self._detected if key not in selected]},
             )
 
-        default = [key for key in self._detected if key not in DEFAULT_EXCLUDED]
         schema = vol.Schema({
-            vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(self._detected),
-            vol.Required(CONF_HIDE_SOURCES, default=False): selector.BooleanSelector(),
+            vol.Required(CONF_MEASUREMENTS, default=self._detected): _measurement_selector(self._detected),
         })
         return self.async_show_form(step_id="measurements", data_schema=schema)
 
@@ -116,19 +102,14 @@ class CombinedPlugOptionsFlow(config_entries.OptionsFlow):
             selected = set(user_input[CONF_MEASUREMENTS])
             return self.async_create_entry(
                 title="",
-                data={
-                    CONF_EXCLUDED: [key for key in detected if key not in selected],
-                    CONF_HIDE_SOURCES: user_input[CONF_HIDE_SOURCES],
-                },
+                data={CONF_EXCLUDED: [key for key in detected if key not in selected]},
             )
 
-        current_excluded = self.config_entry.options.get(CONF_EXCLUDED, list(DEFAULT_EXCLUDED))
-        default = [key for key in detected if key not in current_excluded]
+        excluded = self.config_entry.options.get(CONF_EXCLUDED, [])
         schema = vol.Schema({
-            vol.Required(CONF_MEASUREMENTS, default=default): _measurement_selector(detected),
             vol.Required(
-                CONF_HIDE_SOURCES,
-                default=self.config_entry.options.get(CONF_HIDE_SOURCES, False),
-            ): selector.BooleanSelector(),
+                CONF_MEASUREMENTS,
+                default=[key for key in detected if key not in excluded],
+            ): _measurement_selector(detected),
         })
         return self.async_show_form(step_id="init", data_schema=schema)

@@ -1,6 +1,6 @@
-"""Match sensors to selected physical switches through the HA entity registry.
+"""Match sensors to selected physical outlets through the HA entity registry.
 
-Supports ZHA and other integrations. Never assumes specific entity IDs or names.
+Supports ZHA, Matter and other integrations. Never assumes specific entity IDs or names.
 If a device exposes ambiguous sensors, leave that measurement out rather than
 silently selecting the wrong one.
 """
@@ -48,7 +48,7 @@ def _candidate_label(hass: HomeAssistant, entity) -> str:
 
 
 def _score(hass: HomeAssistant, entity, measurement: Measurement) -> int:
-    """Return 0 for clearly wrong class, score based on class and names."""
+    """Return 0 for a clearly wrong match, otherwise a score from class and names."""
     cls = _sensor_class(hass, entity)
     if cls and cls != measurement.device_class:
         return 0
@@ -58,8 +58,6 @@ def _score(hass: HomeAssistant, entity, measurement: Measurement) -> int:
         return 0
     if measurement.key == "energy_export" and not matched:
         return 0
-    # A device_class match is strong enough for unambiguous measurements;
-    # for export energy, a name distinguishing export from import is required.
     return (10 if cls == measurement.device_class else 0) + (2 * len(matched))
 
 
@@ -84,12 +82,19 @@ def _source_sensor(hass: HomeAssistant, registry: er.EntityRegistry, switch_id: 
     return candidates[0][1]
 
 
-def discover_sensors(hass: HomeAssistant, switches: list[str]) -> dict[str, list[str]]:
-    """Only include measurements present on all selected, different sources."""
+def discover_matrix(hass: HomeAssistant, switches: list[str]) -> dict[str, list[str | None]]:
+    """For every measurement, the matching sensor per outlet (None where missing)."""
     registry = er.async_get(hass)
-    result: dict[str, list[str]] = {}
-    for measurement in MEASUREMENTS:
-        found = [_source_sensor(hass, registry, entity_id, measurement) for entity_id in switches]
-        if all(found) and len(set(found)) == len(switches):
-            result[measurement.key] = found
-    return result
+    return {
+        measurement.key: [_source_sensor(hass, registry, entity_id, measurement) for entity_id in switches]
+        for measurement in MEASUREMENTS
+    }
+
+
+def discover_sensors(hass: HomeAssistant, switches: list[str]) -> dict[str, list[str]]:
+    """Only measurements present on every selected, different outlet."""
+    return {
+        key: found
+        for key, found in discover_matrix(hass, switches).items()
+        if all(found) and len(set(found)) == len(switches)
+    }

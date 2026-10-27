@@ -6,19 +6,15 @@ from dataclasses import dataclass
 
 DOMAIN = "combined_plug"
 CONF_SWITCHES = "switches"
-CONF_SENSORS = "sensors"
-CONF_ALL_ON = "all_on"
 CONF_EXCLUDED = "excluded"
 CONF_MEASUREMENTS = "measurements"
-CONF_HIDE_SOURCES = "hide_sources"
-# Measurements left out by default: exported energy is only relevant with PV or feed-in.
-DEFAULT_EXCLUDED = ("energy_export",)
+# Entity IDs this integration hid on the source outlets; restored on removal.
+CONF_HIDDEN = "hidden_entities"
 
 
 @dataclass(frozen=True, slots=True)
 class Measurement:
     key: str
-    label: str
     device_class: str
     unit: str
     aggregation: str
@@ -27,25 +23,25 @@ class Measurement:
 
 
 MEASUREMENTS = (
-    Measurement("power", "Power", "power", "W", "sum", 2, (
+    Measurement("power", "power", "W", "sum", 2, (
         "power", "active_power", "leistung", "watt", "power_consumption", "wirkleistung",
     )),
-    Measurement("energy", "Energy", "energy", "kWh", "sum", 4, (
+    Measurement("energy", "energy", "kWh", "sum", 4, (
         "energy", "energie", "consumption", "verbrauch", "kwh", "electricity", "import", "delivered",
     )),
-    Measurement("energy_export", "Exported energy", "energy", "kWh", "sum", 4, (
+    Measurement("energy_export", "energy", "kWh", "sum", 4, (
         "export", "exported", "returned", "return", "einspeisung", "eingespeist", "eingespeiste", "feed_in", "production", "injected", "ruecklieferung",
     )),
-    Measurement("voltage", "Voltage", "voltage", "V", "average", 2, (
+    Measurement("voltage", "voltage", "V", "average", 2, (
         "voltage", "spannung", "rms_voltage", "volt",
     )),
-    Measurement("current", "Current", "current", "A", "sum", 3, (
+    Measurement("current", "current", "A", "sum", 3, (
         "current", "stromstaerke", "stromstarke", "strom", "amperage", "rms_current",
     )),
-    Measurement("frequency", "Frequency", "frequency", "Hz", "average", 2, (
+    Measurement("frequency", "frequency", "Hz", "average", 2, (
         "frequency", "frequenz", "hz",
     )),
-    Measurement("power_factor", "Power factor", "power_factor", "%", "weighted_average", 1, (
+    Measurement("power_factor", "power_factor", "%", "weighted_average", 1, (
         "power_factor", "leistungsfaktor", "cos_phi", "cosphi",
     )),
 )

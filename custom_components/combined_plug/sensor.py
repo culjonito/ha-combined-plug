@@ -21,7 +21,7 @@ class CombinedPlugSensor(CombinedPlugEntity, SensorEntity):
         super().__init__(runtime, key)
         self.key = key
         measurement = MEASUREMENT_BY_KEY[key]
-        self._attr_name = measurement.label
+        self._attr_translation_key = key
         self._attr_device_class = SensorDeviceClass(measurement.device_class)
         self._attr_native_unit_of_measurement = measurement.unit
         # Summed source counters can decrease when only one plug resets;
@@ -57,9 +57,9 @@ class CombinedPlugSensor(CombinedPlugEntity, SensorEntity):
         return round(result, MEASUREMENT_BY_KEY[self.key].decimals) if result is not None else None
 
     @property
-    def available(self) -> bool:
-        return self._calculate() is not None
-
-    @property
     def native_value(self) -> float | None:
         return self._calculate()
+
+    @property
+    def available(self) -> bool:
+        return self.native_value is not None

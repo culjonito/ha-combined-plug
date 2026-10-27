@@ -14,21 +14,17 @@
         }
       },
       "measurements": {
-        "title": "Messwerte und Sichtbarkeit",
-        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Eingespeiste Energie ist standardmäßig aus.",
+        "title": "Messwerte auswählen",
+        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Die Sensoren der Original-Steckdosen für die gewählten Messwerte werden ausgeblendet; die gemeinsame Steckdose zeigt sie an.",
         "data": {
-          "measurements": "Messwerte",
-          "hide_sources": "Original-Steckdosen ausblenden"
-        },
-        "data_description": {
-          "hide_sources": "Blendet die Entitäten der einzelnen Steckdosen aus. Sie funktionieren weiter; du steuerst sie über die gemeinsame Steckdose."
+          "measurements": "Messwerte"
         }
       }
     },
     "error": {
       "at_least_two": "Bitte mindestens zwei verschiedene Steckdosen auswählen.",
       "physical_switches_only": "Bitte physische Steckdosen mit eigenem Gerät auswählen, keine Gruppen oder virtuellen Schalter.",
-      "no_common_measurements": "Keine gemeinsamen Messwerte bei allen ausgewählten Geräten erkannt. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind.",
+      "no_common_measurements": "Bei allen ausgewählten Steckdosen sind keine gemeinsamen Messwerte verfügbar. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind.",
       "already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."
     },
     "abort": {
@@ -38,22 +34,49 @@
   "options": {
     "step": {
       "init": {
-        "title": "Messwerte und Sichtbarkeit",
+        "title": "Messwerte",
         "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Änderungen laden die Integration neu.",
         "data": {
-          "measurements": "Messwerte",
-          "hide_sources": "Original-Steckdosen ausblenden"
-        },
-        "data_description": {
-          "hide_sources": "Blendet die Entitäten der einzelnen Steckdosen aus. Sie funktionieren weiter; du steuerst sie über die gemeinsame Steckdose."
+          "measurements": "Messwerte"
         }
       }
     }
   },
   "entity": {
-    "switch": {
-      "outlet": {
-        "name": "Steckdose {index}"
+    "sensor": {
+      "power": {
+        "name": "Leistung"
+      },
+      "energy": {
+        "name": "Energie"
+      },
+      "energy_export": {
+        "name": "Eingespeiste Energie"
+      },
+      "voltage": {
+        "name": "Spannung (Effektivwert)"
+      },
+      "current": {
+        "name": "Stromstärke (Effektivwert)"
+      },
+      "frequency": {
+        "name": "Frequenz"
+      },
+      "power_factor": {
+        "name": "Leistungsfaktor"
+      }
+    }
+  },
+  "selector": {
+    "measurement": {
+      "options": {
+        "power": "Leistung",
+        "energy": "Energie",
+        "energy_export": "Eingespeiste Energie",
+        "voltage": "Spannung (Effektivwert)",
+        "current": "Stromstärke (Effektivwert)",
+        "frequency": "Frequenz",
+        "power_factor": "Leistungsfaktor"
       }
     }
   }

@@ -2,36 +2,37 @@
 
 One virtual Home Assistant outlet from two or more physical outlets. No YAML, automations, MQTT or helper entities needed.
 
-**Status: 0.4.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
+**Status: 0.5.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
 
 ## Features
 
-- Set up from **Settings → Devices & services → Add integration → Combined Plug**.
-- Choose a name and two or more physical switch entities, then tick the measurements to include (setup step).
-- Creates **one virtual device** with a **main switch** for all source outlets, plus **one switch per source outlet** so each can be switched individually.
-- Optional: hide the original outlets' entities, so only the combined outlet is visible.
-- Available in English and German; follows Home Assistant's language.
-- Detects measurement sensors from each source outlet's **device registry** (works with ZHA, Matter and other integrations that expose regular Home Assistant sensor entities).
-- Combines readings only when every selected outlet provides the matching measurement:
+- Set up from **Settings → Devices & services → Add integration → Combined Plug**: give it a name, pick two or more outlets and tick the measurements to combine.
+- Creates **one virtual device** with:
+  - a **main switch** that switches all source outlets,
+  - **one switch per source outlet**, named as the original outlet is named in Home Assistant,
+  - **one sensor per combined measurement**.
+- The original outlets' switches and the sensors used for combining are **hidden** on their devices, so the combined device is the only place you see them. Hidden entities keep working. Deleting the combined outlet unhides them again.
+- Detects measurement sensors from each source outlet's **device registry** (ZHA, Matter and other integrations that expose regular sensor entities).
+- Combines readings only when **every** selected outlet provides the measurement. A measurement that only some outlets have is not combined, so no value is ever a partial sum; it stays visible on the original outlet.
 
 | Sensor | Method |
 | --- | --- |
 | Power (W) | Sum |
 | Energy (kWh) | Sum |
-| Exported energy (kWh) | Sum (excluded by default, see Options) |
+| Exported energy (kWh) | Sum |
 | Current (A) | Sum (only meaningful if all outlets are on the same phase) |
 | Voltage (V) | Arithmetic mean |
 | Frequency (Hz) | Arithmetic mean |
 | Power factor (%) | Apparent-power-weighted average when voltage and current are available; otherwise arithmetic mean |
 
 - Values refresh when source entities change, not on a polling timer.
-- Source outlets remain independent physical devices; their registry entries are not altered.
-- Renaming a source switch is followed automatically; the integration reloads with the new entity ID.
+- Names and entity labels follow Home Assistant's language (English and German).
+- Renaming a source outlet is followed automatically.
 - One config entry represents one group. Add Combined Plug again for additional groups.
 
 ## Measurements
 
-During setup (and later via **Configure**), untick any measurement the virtual outlet should not expose, and choose whether to hide the original outlets. Exported energy is unticked by default. Hiding only affects entities that were hidden by this integration; deleting the combined outlet unhides them again.
+During setup, and later via **Configure**, untick the measurements the combined outlet should not show. Changing this reloads the integration and updates which sensors are hidden on the originals.
 
 ## Installation
 
@@ -51,12 +52,12 @@ During setup (and later via **Configure**), untick any measurement the virtual o
 
 - **No device names or entity IDs are hardcoded.** Detection relies on each selected switch having its own device registry entry and on each measurement being assigned to the *same physical device* as that switch.
 - A measurement is only offered if all selected outlets provide it. Ambiguous matches on a device are omitted rather than guessed.
-- Sensors disabled in the entity registry are not discovered. Enable the desired measurements first.
+- Sensors that are disabled in the entity registry are not discovered (disabled entities have no state, so they cannot be combined). Enable the desired measurements first.
 - Source devices or measurements added later are not discovered automatically. Reload the integration (or remove and re-add it) to re-run discovery.
 - Do not merge the source devices with Device Tools; merged devices lose their unique sensor associations.
 - **Power factor** is unavailable while source outlets report it as `unknown`.
-- **Energy statistics:** the summed energy counter is exposed as `total`, not `total_increasing`, so a reset on one source cannot be mistaken for a new meter cycle. Do not add both the combined energy sensor and the individual outlets to the Energy Dashboard, or consumption is counted twice.
-- Toggle behaviour: the virtual outlet reports `on` when **any** member is on. Switching it on or off always targets **every** member.
+- **Energy statistics:** the summed energy counter is exposed as `total`, not `total_increasing`, so a reset on one source cannot be mistaken for a new meter cycle. Use the combined energy sensor in the Energy Dashboard, not the individual outlets, or consumption is counted twice.
+- The main switch reports `on` when **any** outlet is on. Switching it always targets **every** outlet.
 - Sources that become unavailable make the computed sensors unavailable.
 
 ## Development
