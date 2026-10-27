@@ -1,7 +1,5 @@
 # Combined Plug
 
-<img src="custom_components/combined_plug/brand/icon.png" alt="Combined Plug" width="160">
-
 One virtual Home Assistant outlet from two or more physical outlets. No YAML, automations, MQTT or helper entities needed.
 
 **Status: 0.6.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
