@@ -1,12 +1,14 @@
 # Combined Plug
 
+<img src="custom_components/combined_plug/brand/icon.png" alt="Combined Plug" width="160">
+
 One virtual Home Assistant outlet from two or more physical outlets. No YAML, automations, MQTT or helper entities needed.
 
-**Status: 0.5.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
+**Status: 0.6.0. Unit-tested, but not yet verified against a live Home Assistant instance. Please report issues.**
 
 ## Features
 
-- Set up from **Settings → Devices & services → Add integration → Combined Plug**: give it a name, pick two or more outlets and tick the measurements to combine.
+- Set up from **Settings → Devices & services → Add integration → Combined Plug**: give it a name and pick two or more outlets. Every measurement they all share is combined; there are no options to choose.
 - Creates **one virtual device** with:
   - a **main switch** that switches all source outlets,
   - **one switch per source outlet**, named as the original outlet is named in Home Assistant,
@@ -29,10 +31,6 @@ One virtual Home Assistant outlet from two or more physical outlets. No YAML, au
 - Names and entity labels follow Home Assistant's language (English and German).
 - Renaming a source outlet is followed automatically.
 - One config entry represents one group. Add Combined Plug again for additional groups.
-
-## Measurements
-
-During setup, and later via **Configure**, untick the measurements the combined outlet should not show. Changing this reloads the integration and updates which sensors are hidden on the originals.
 
 ## Installation
 

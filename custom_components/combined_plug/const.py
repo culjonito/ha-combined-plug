@@ -6,8 +6,6 @@ from dataclasses import dataclass
 
 DOMAIN = "combined_plug"
 CONF_SWITCHES = "switches"
-CONF_EXCLUDED = "excluded"
-CONF_MEASUREMENTS = "measurements"
 # Entity IDs this integration hid on the source outlets; restored on removal.
 CONF_HIDDEN = "hidden_entities"
 

@@ -10,8 +10,8 @@ from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_track_state_change_event
 
-from .calculation import active_measurements, replace_entity_id
-from .const import CONF_EXCLUDED, CONF_HIDDEN, CONF_SWITCHES
+from .calculation import replace_entity_id
+from .const import CONF_HIDDEN, CONF_SWITCHES
 from .discovery import discover_sensors
 
 PLATFORMS = (Platform.SWITCH, Platform.SENSOR)
@@ -24,10 +24,7 @@ class CombinedPlugRuntime:
         self.hass = hass
         self.entry = entry
         self.switches: list[str] = list(entry.data[CONF_SWITCHES])
-        self.applied_options = dict(entry.options)
-        self.sensors: dict[str, list[str]] = active_measurements(
-            discover_sensors(hass, self.switches), entry.options.get(CONF_EXCLUDED, [])
-        )
+        self.sensors: dict[str, list[str]] = discover_sensors(hass, self.switches)
         self._entities: set = set()
 
     def source_entities(self) -> set[str]:
@@ -101,18 +98,11 @@ def _sync_visibility(hass: HomeAssistant, entry: ConfigEntry) -> None:
         )
 
 
-async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload only for option changes; data writes (visibility bookkeeping) must not loop."""
-    if entry.options != entry.runtime_data.applied_options:
-        await hass.config_entries.async_reload(entry.entry_id)
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     runtime = CombinedPlugRuntime(hass, entry)
     entry.runtime_data = runtime
     runtime.start()
     _sync_visibility(hass, entry)
-    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 

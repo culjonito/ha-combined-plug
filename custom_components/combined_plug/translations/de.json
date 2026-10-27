@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Gemeinsame Steckdose erstellen",
-        "description": "Wähle mindestens zwei physische Steckdosen. Messwerte werden automatisch über deren Geräte erkannt. Keine Helfer oder YAML nötig.",
+        "description": "Wähle mindestens zwei physische Steckdosen. Alle Messwerte, die sie gemeinsam haben, werden automatisch zusammengefasst: Leistung und Energie werden addiert, Spannung und Frequenz gemittelt. Diese Sensoren erscheinen dann an der gemeinsamen Steckdose, die Originale werden ausgeblendet.",
         "data": {
           "name": "Name",
           "switches": "Steckdosen"
@@ -12,34 +12,16 @@
         "data_description": {
           "switches": "Wähle zwei oder mehr einzelne Steckdosen. Gruppen sind nicht erlaubt."
         }
-      },
-      "measurements": {
-        "title": "Messwerte auswählen",
-        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Die Sensoren der Original-Steckdosen für die gewählten Messwerte werden ausgeblendet; die gemeinsame Steckdose zeigt sie an.",
-        "data": {
-          "measurements": "Messwerte"
-        }
       }
     },
     "error": {
       "at_least_two": "Bitte mindestens zwei verschiedene Steckdosen auswählen.",
       "physical_switches_only": "Bitte physische Steckdosen mit eigenem Gerät auswählen, keine Gruppen oder virtuellen Schalter.",
-      "no_common_measurements": "Bei allen ausgewählten Steckdosen sind keine gemeinsamen Messwerte verfügbar. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind.",
+      "no_common_measurements": "Die ausgewählten Steckdosen haben keine gemeinsamen Messwerte. Prüfe, ob die Sensoren aktiviert und den ursprünglichen Geräten zugeordnet sind.",
       "already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."
     },
     "abort": {
       "already_configured": "Diese Steckdosenkombination ist bereits eingerichtet."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Messwerte",
-        "description": "Entferne den Haken bei Messwerten, die die gemeinsame Steckdose nicht anzeigen soll. Änderungen laden die Integration neu.",
-        "data": {
-          "measurements": "Messwerte"
-        }
-      }
     }
   },
   "entity": {
@@ -64,19 +46,6 @@
       },
       "power_factor": {
         "name": "Leistungsfaktor"
-      }
-    }
-  },
-  "selector": {
-    "measurement": {
-      "options": {
-        "power": "Leistung",
-        "energy": "Energie",
-        "energy_export": "Eingespeiste Energie",
-        "voltage": "Spannung (Effektivwert)",
-        "current": "Stromstärke (Effektivwert)",
-        "frequency": "Frequenz",
-        "power_factor": "Leistungsfaktor"
       }
     }
   }

@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Create a combined outlet",
-        "description": "Select at least two physical outlets. Measurements are detected automatically from their devices. No helpers or YAML required.",
+        "description": "Select at least two physical outlets. Every measurement they all share is combined automatically: summed for power and energy, averaged for voltage and frequency. Those sensors are then shown on the combined outlet, and the originals are hidden.",
         "data": {
           "name": "Name",
           "switches": "Outlets"
@@ -12,34 +12,16 @@
         "data_description": {
           "switches": "Select two or more individual outlets. Groups are not allowed."
         }
-      },
-      "measurements": {
-        "title": "Choose measurements",
-        "description": "Untick any measurement the combined outlet should not show. The original outlets' sensors for the chosen measurements are hidden; the combined outlet shows them instead.",
-        "data": {
-          "measurements": "Measurements"
-        }
       }
     },
     "error": {
       "at_least_two": "Choose at least two different outlets.",
       "physical_switches_only": "Choose physical outlets with their own device, not groups or virtual switches.",
-      "no_common_measurements": "No measurements are available on all selected outlets. Check that the sensors are enabled and assigned to the original devices.",
+      "no_common_measurements": "The selected outlets share no measurements. Check that their sensors are enabled and assigned to the original devices.",
       "already_configured": "This combination of outlets is already set up."
     },
     "abort": {
       "already_configured": "This combination of outlets is already set up."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Measurements",
-        "description": "Untick any measurement the combined outlet should not show. Changes reload the integration.",
-        "data": {
-          "measurements": "Measurements"
-        }
-      }
     }
   },
   "entity": {
@@ -64,19 +46,6 @@
       },
       "power_factor": {
         "name": "Power factor"
-      }
-    }
-  },
-  "selector": {
-    "measurement": {
-      "options": {
-        "power": "Power",
-        "energy": "Energy",
-        "energy_export": "Exported energy",
-        "voltage": "Voltage",
-        "current": "Current",
-        "frequency": "Frequency",
-        "power_factor": "Power factor"
       }
     }
   }

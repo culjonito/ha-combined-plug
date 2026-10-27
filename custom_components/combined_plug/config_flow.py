@@ -8,31 +8,16 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er, selector
 
-from .const import CONF_EXCLUDED, CONF_MEASUREMENTS, CONF_SWITCHES, DOMAIN
+from .const import CONF_SWITCHES, DOMAIN
 from .discovery import discover_sensors
 
 
-def _measurement_selector(detected: list[str]) -> selector.SelectSelector:
-    return selector.SelectSelector(selector.SelectSelectorConfig(
-        options=detected,
-        multiple=True,
-        mode=selector.SelectSelectorMode.LIST,
-        translation_key="measurement",
-    ))
-
-
 class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Select any two or more physical outlets."""
+    """Select any two or more physical outlets; every measurement they share is combined."""
 
     VERSION = 2
-
-    def __init__(self) -> None:
-        self._name = ""
-        self._switches: list[str] = []
-        self._detected: list[str] = []
 
     async def async_step_user(self, user_input=None):
         errors: dict[str, str] = {}
@@ -55,14 +40,13 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 token = ",".join(sorted(switches))
                 await self.async_set_unique_id(hashlib.sha256(token.encode()).hexdigest())
                 self._abort_if_unique_id_configured()
-                detected = list(discover_sensors(self.hass, switches))
-                if not detected:
+                if not discover_sensors(self.hass, switches):
                     errors["base"] = "no_common_measurements"
                 else:
-                    self._name = user_input[CONF_NAME].strip()
-                    self._switches = switches
-                    self._detected = detected
-                    return await self.async_step_measurements()
+                    return self.async_create_entry(
+                        title=user_input[CONF_NAME].strip(),
+                        data={CONF_SWITCHES: switches},
+                    )
 
         schema = vol.Schema({
             vol.Required(CONF_NAME, default="Combined Plug"): selector.TextSelector(),
@@ -71,45 +55,3 @@ class CombinedPlugConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
-
-    async def async_step_measurements(self, user_input=None):
-        """Untick measurements before anything is created; all are on by default."""
-        if user_input is not None:
-            selected = set(user_input[CONF_MEASUREMENTS])
-            return self.async_create_entry(
-                title=self._name,
-                data={CONF_SWITCHES: self._switches},
-                options={CONF_EXCLUDED: [key for key in self._detected if key not in selected]},
-            )
-
-        schema = vol.Schema({
-            vol.Required(CONF_MEASUREMENTS, default=self._detected): _measurement_selector(self._detected),
-        })
-        return self.async_show_form(step_id="measurements", data_schema=schema)
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        return CombinedPlugOptionsFlow()
-
-
-class CombinedPlugOptionsFlow(config_entries.OptionsFlow):
-    """Change which detected measurements the virtual outlet exposes."""
-
-    async def async_step_init(self, user_input=None):
-        detected = list(discover_sensors(self.hass, list(self.config_entry.data[CONF_SWITCHES])))
-        if user_input is not None:
-            selected = set(user_input[CONF_MEASUREMENTS])
-            return self.async_create_entry(
-                title="",
-                data={CONF_EXCLUDED: [key for key in detected if key not in selected]},
-            )
-
-        excluded = self.config_entry.options.get(CONF_EXCLUDED, [])
-        schema = vol.Schema({
-            vol.Required(
-                CONF_MEASUREMENTS,
-                default=[key for key in detected if key not in excluded],
-            ): _measurement_selector(detected),
-        })
-        return self.async_show_form(step_id="init", data_schema=schema)
